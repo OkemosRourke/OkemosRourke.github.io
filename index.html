@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher Directory</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --border: #dbe2ea;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+    }
+    .sub {
+      margin: 0 0 24px;
+      color: var(--muted);
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .field label {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-size: 1rem;
+      background: white;
+    }
+    input:focus, select:focus {
+      outline: 2px solid var(--accent-soft);
+      border-color: var(--accent);
+    }
+    .details {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .tile {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      background: #fff;
+    }
+    .tile-label {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    .tile-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+    .placeholder {
+      text-align: center;
+      color: var(--muted);
+      padding: 28px 16px;
+    }
+    .matches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .chip {
+      border: 1px solid var(--border);
+      background: #f1f5f9;
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .chip:hover {
+      background: var(--accent-soft);
+      border-color: #93c5fd;
+    }
+    .count {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    @media (max-width: 700px) {
+      .grid, .details {
+        grid-template-columns: 1fr;
+      }
+      .wrap {
+        padding: 16px;
+      }
+      .tile-value {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Teacher Directory</h1>
+    <p class="sub">Search or select a teacher to view room number, extension, lunch, and conference period.</p>
+
+    <div class="card">
+      <div class="grid">
+        <div class="field">
+          <label for="search">Search</label>
+          <input id="search" type="text" placeholder="Type a name, room, or extension" />
+        </div>
+        <div class="field">
+          <label for="teacherSelect">Select teacher</label>
+          <select id="teacherSelect">
+            <option value="">Choose a teacher</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="detailsCard">
+      <div id="detailsContent" class="placeholder">Choose a teacher from the dropdown or search until one match remains.</div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0;font-size:1.15rem;">Quick matches</h2>
+      <div id="quickMatches" class="matches"></div>
+      <div id="matchCount" class="count"></div>
+    </div>
+  </div>
+
+  <script>
+    const teachers = [{"name": "Abbott, Christina", "classroom": "C223", "extension": "4888", "lunch": "B", "conference": "1"}, {"name": "Bachelder, Patricia", "classroom": "A107", "extension": "4984", "lunch": "C", "conference": "4"}, {"name": "Backus, Mike", "classroom": "D139", "extension": "4999", "lunch": "A", "conference": "5"}, {"name": "Becker, Olivia", "classroom": "D136", "extension": "4959", "lunch": "A", "conference": "2"}, {"name": "Bell, Laura", "classroom": "C220", "extension": "4887", "lunch": "B", "conference": "4"}, {"name": "Brazier, Dorean", "classroom": "C127", "extension": "4893", "lunch": "C", "conference": "3"}, {"name": "Brennan, Pat", "classroom": "A110", "extension": "4969", "lunch": "C", "conference": "2"}, {"name": "Brooks, Ricky", "classroom": "B120", "extension": "4961", "lunch": "C", "conference": "1"}, {"name": "Buggia, Dean", "classroom": "D135/137", "extension": "4955", "lunch": "A", "conference": "3"}, {"name": "Carrier, Kelly", "classroom": "C225", "extension": "4881", "lunch": "B", "conference": "4"}, {"name": "Computer Art", "classroom": "CompArt", "extension": "4951", "lunch": "", "conference": ""}, {"name": "Dekatch, Chad", "classroom": "A209", "extension": "4791", "lunch": "B", "conference": "5"}, {"name": "Dontje, Benjamin", "classroom": "D237", "extension": "4786", "lunch": "A", "conference": "1"}, {"name": "Duffield, Whitney", "classroom": "A201", "extension": "4798", "lunch": "B", "conference": "4"}, {"name": "Erdman, Larry", "classroom": "A205", "extension": "4794", "lunch": "B", "conference": "5"}, {"name": "Fahy, Ethan", "classroom": "D134", "extension": "4766", "lunch": "A", "conference": "3"}, {"name": "Farnelli, Gina", "classroom": "A102", "extension": "4973", "lunch": "C", "conference": "4"}, {"name": "Ferber, Caitlin", "classroom": "B212", "extension": "4993", "lunch": "C", "conference": "1"}, {"name": "Fletcher, Eddie", "classroom": "D233", "extension": "4775", "lunch": "A", "conference": "5"}, {"name": "Fletcher, Shelby", "classroom": "B214", "extension": "4966", "lunch": "C", "conference": "3"}, {"name": "Floyd, Andy", "classroom": "B112", "extension": "4983", "lunch": "A", "conference": "N/A"}, {"name": "Foster-Mills, Abigail", "classroom": "C125", "extension": "4883", "lunch": "B", "conference": "5"}, {"name": "Freeman, Bethany", "classroom": "Gym/D141", "extension": "4934", "lunch": "C", "conference": "2"}, {"name": "Freeman-Baldwin, Rachel", "classroom": "B218", "extension": "4964", "lunch": "C", "conference": "1"}, {"name": "Funk, Trisha", "classroom": "B116", "extension": "4985", "lunch": "A", "conference": "4"}, {"name": "Gahsman, Cory", "classroom": "A208", "extension": "4981", "lunch": "B", "conference": "3"}, {"name": "Green Room - LaLonde, Lucas", "classroom": "GreenRm", "extension": "4940", "lunch": "", "conference": ""}, {"name": "Gutierrez, Jose", "classroom": "B118", "extension": "4987", "lunch": "A", "conference": "5"}, {"name": "Hagen, Nicole", "classroom": "A100", "extension": "4979", "lunch": "A", "conference": "N/A"}, {"name": "Halcrow-Reynolds, Jane", "classroom": "D130", "extension": "4772", "lunch": "A", "conference": "1"}, {"name": "Harnica, William", "classroom": "D236", "extension": "4768", "lunch": "A", "conference": "4"}, {"name": "Harrod, Lindsay", "classroom": "D131/133", "extension": "4958", "lunch": "A", "conference": "4"}, {"name": "Hassell, Andrew", "classroom": "A203", "extension": "4796", "lunch": "B", "conference": "3"}, {"name": "Health Room", "classroom": "D141", "extension": "4954", "lunch": "", "conference": ""}, {"name": "Heethuis, Kristen", "classroom": "D234", "extension": "4764", "lunch": "A", "conference": "5"}, {"name": "Heim, Nathan", "classroom": "B113", "extension": "4776", "lunch": "A", "conference": "N/A"}, {"name": "Herman, Natalie", "classroom": "B213", "extension": "4909", "lunch": "C", "conference": "1"}, {"name": "Hetfield, Tammy", "classroom": "C122", "extension": "4892", "lunch": "B", "conference": "5"}, {"name": "Hintze, Lauren", "classroom": "A212", "extension": "4894", "lunch": "C", "conference": "4"}, {"name": "Hollenback, Rachel", "classroom": "Art 2D", "extension": "4942", "lunch": "C", "conference": "4"}, {"name": "Huynh, Johnny", "classroom": "D235", "extension": "4967", "lunch": "A", "conference": "5"}, {"name": "Itsell-Olson, Taylor", "classroom": "C227", "extension": "4989", "lunch": "C", "conference": "5"}, {"name": "Ives, Danielle", "classroom": "A207", "extension": "4793", "lunch": "B", "conference": "6"}, {"name": "Kiva", "classroom": "KIVA", "extension": "4913", "lunch": "", "conference": ""}, {"name": "Levinshon, Shoni", "classroom": "B220", "extension": "4994", "lunch": "C", "conference": "2"}, {"name": "Long, Kyle", "classroom": "C222", "extension": "4761", "lunch": "B", "conference": "2"}, {"name": "Luzbetak, Lauren", "classroom": "LMC Rm3", "extension": "4968", "lunch": "C", "conference": "N/A"}, {"name": "McKay, Stephanie", "classroom": "A108", "extension": "4895", "lunch": "A", "conference": "N/A"}, {"name": "McNeil, Beth", "classroom": "B117", "extension": "4988", "lunch": "A", "conference": "2"}, {"name": "Miller, Keith", "classroom": "A101", "extension": "4976", "lunch": "A", "conference": "3"}, {"name": "Murchie, Sharon", "classroom": "A106", "extension": "4965", "lunch": "C", "conference": "2"}, {"name": "Murphy, Brian", "classroom": "D230", "extension": "4771", "lunch": "A", "conference": "3"}, {"name": "Nieuwkoop, Jessica", "classroom": "Choir", "extension": "4945", "lunch": "C", "conference": "N/A"}, {"name": "O'Rourke, Tiernan", "classroom": "A202", "extension": "4795", "lunch": "B", "conference": "1"}, {"name": "Ouellette, Kim", "classroom": "A109", "extension": "4896", "lunch": "C", "conference": "6"}, {"name": "Patnoude, Mindy", "classroom": "B211", "extension": "4970", "lunch": "C", "conference": "4"}, {"name": "Phillips, Jessica", "classroom": "A103", "extension": "4977", "lunch": "A", "conference": "1"}, {"name": "Potere, Erik", "classroom": "B217", "extension": "4949", "lunch": "C", "conference": "5"}, {"name": "Reed, Dawn", "classroom": "A104", "extension": "4972", "lunch": "C", "conference": "4"}, {"name": "Richter, Laura", "classroom": "C123", "extension": "4890", "lunch": "B", "conference": "6"}, {"name": "Room A210 - Vacant", "classroom": "A210", "extension": "4963", "lunch": "", "conference": ""}, {"name": "Room B114 - Vacant", "classroom": "B114", "extension": "4996", "lunch": "", "conference": ""}, {"name": "Room C221 - Vacant", "classroom": "C221", "extension": "4885", "lunch": "", "conference": ""}, {"name": "Room D239 - Vacant", "classroom": "D239", "extension": "4773", "lunch": "", "conference": ""}, {"name": "Samluk, Melissa", "classroom": "B111", "extension": "4982", "lunch": "A", "conference": "6"}, {"name": "Sanders, Karen", "classroom": "B115", "extension": "4986", "lunch": "A", "conference": "4"}, {"name": "Saros, Jason", "classroom": "D231", "extension": "4762", "lunch": "A", "conference": "4"}, {"name": "Schoonover, Chrissy", "classroom": "D132", "extension": "4767", "lunch": "A", "conference": "6"}, {"name": "Seidl, Katie", "classroom": "A206", "extension": "4952", "lunch": "B", "conference": "6"}, {"name": "Solomon, Emily", "classroom": "B216", "extension": "4962", "lunch": "C", "conference": "6"}, {"name": "Stadt, Megan", "classroom": "LibOffice1", "extension": "4943", "lunch": "B", "conference": "N/A"}, {"name": "Stice, Mark", "classroom": "Band", "extension": "4946", "lunch": "C", "conference": "6"}, {"name": "Sundeen, Antonia", "classroom": "D232", "extension": "4763", "lunch": "A", "conference": "2"}, {"name": "Tandoc, Danielle", "classroom": "C121", "extension": "4882", "lunch": "B", "conference": "6"}, {"name": "Teacher's Lounge", "classroom": "Lounge", "extension": "4919", "lunch": "", "conference": ""}, {"name": "Turner, Molly", "classroom": "C124", "extension": "4889", "lunch": "B", "conference": "3"}, {"name": "Valla, Justin", "classroom": "Orch", "extension": "4947", "lunch": "C", "conference": "6"}, {"name": "Welch, Amanda", "classroom": "Art 3D", "extension": "4948", "lunch": "C", "conference": "1"}, {"name": "Whitman, Elijah", "classroom": "A204", "extension": "4799", "lunch": "B", "conference": "6"}, {"name": "Whitmyer, Kortney", "classroom": "A200", "extension": "4788", "lunch": "B", "conference": "2"}, {"name": "Williams, Alexandria", "classroom": "C120", "extension": "4886", "lunch": "B", "conference": "1"}, {"name": "Williams, Brian", "classroom": "C224", "extension": "4891", "lunch": "B", "conference": "3"}, {"name": "Wonch, Jeff", "classroom": "Gym/D141", "extension": "4935", "lunch": "C", "conference": "3"}, {"name": "Woodcock, Ben", "classroom": "B215", "extension": "4974", "lunch": "C", "conference": "1"}];
+    const searchInput = document.getElementById('search');
+    const teacherSelect = document.getElementById('teacherSelect');
+    const detailsContent = document.getElementById('detailsContent');
+    const quickMatches = document.getElementById('quickMatches');
+    const matchCount = document.getElementById('matchCount');
+
+    let selectedName = '';
+
+    function normalize(value) {
+      return (value || '').toString().toLowerCase();
+    }
+
+    function getFilteredTeachers() {
+      const q = normalize(searchInput.value.trim());
+      if (!q) return teachers;
+      return teachers.filter(t =>
+        [t.name, t.classroom, t.extension, t.lunch, t.conference]
+          .join(' ')
+          .toLowerCase()
+          .includes(q)
+      );
+    }
+
+    function findSelected(filtered) {
+      if (selectedName) {
+        return teachers.find(t => t.name === selectedName) || null;
+      }
+      if (filtered.length === 1) return filtered[0];
+      return null;
+    }
+
+    function safe(value) {
+      return value && value !== '' ? value : 'N/A';
+    }
+
+    function renderSelect(filtered) {
+      const currentValue = selectedName;
+      teacherSelect.innerHTML = '<option value="">Choose a teacher</option>';
+      filtered.forEach(t => {
+        const option = document.createElement('option');
+        option.value = t.name;
+        option.textContent = t.name;
+        if (t.name === currentValue) option.selected = true;
+        teacherSelect.appendChild(option);
+      });
+    }
+
+    function renderDetails(teacher, filtered) {
+      if (!teacher) {
+        detailsContent.className = 'placeholder';
+        detailsContent.textContent = filtered.length === 0
+          ? 'No matches found. Try a different search.'
+          : 'Choose a teacher from the dropdown or search until one match remains.';
+        return;
+      }
+
+      detailsContent.className = 'details';
+      detailsContent.innerHTML = `
+        <div class="tile">
+          <div class="tile-label">Teacher</div>
+          <div class="tile-value">${safe(teacher.name)}</div>
+        </div>
+        <div class="tile">
+          <div class="tile-label">Room</div>
+          <div class="tile-value">${safe(teacher.classroom)}</div>
+        </div>
+        <div class="tile">
+          <div class="tile-label">Extension</div>
+          <div class="tile-value">${safe(teacher.extension)}</div>
+        </div>
+        <div class="tile">
+          <div class="tile-label">Lunch</div>
+          <div class="tile-value">${safe(teacher.lunch)}</div>
+        </div>
+        <div class="tile">
+          <div class="tile-label">Conference</div>
+          <div class="tile-value">${safe(teacher.conference)}</div>
+        </div>
+      `;
+    }
+
+    function renderQuickMatches(filtered) {
+      quickMatches.innerHTML = '';
+      filtered.slice(0, 20).forEach(t => {
+        const button = document.createElement('button');
+        button.className = 'chip';
+        button.type = 'button';
+        button.textContent = t.name;
+        button.addEventListener('click', () => {
+          selectedName = t.name;
+          teacherSelect.value = t.name;
+          update();
+        });
+        quickMatches.appendChild(button);
+      });
+
+      matchCount.textContent = filtered.length > 20
+        ? `Showing 20 of ${filtered.length} matches. Narrow the search to see fewer results.`
+        : `${filtered.length} match${filtered.length === 1 ? '' : 'es'}`;
+    }
+
+    function update() {
+      const filtered = getFilteredTeachers();
+
+      if (selectedName && !filtered.some(t => t.name === selectedName)) {
+        selectedName = '';
+      }
+
+      renderSelect(filtered);
+      const teacher = findSelected(filtered);
+      renderDetails(teacher, filtered);
+      renderQuickMatches(filtered);
+    }
+
+    searchInput.addEventListener('input', () => {
+      selectedName = '';
+      update();
+    });
+
+    teacherSelect.addEventListener('change', (e) => {
+      selectedName = e.target.value;
+      update();
+    });
+
+    update();
+  </script>
+</body>
+</html>
